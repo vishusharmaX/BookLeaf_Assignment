@@ -1,0 +1,147 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         String        @default("AUTHOR") // "AUTHOR" | "ADMIN"
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  authorProfile AuthorProfile?
+  assignedTickets Ticket[]     @relation("AdminTickets")
+  messages      TicketMessage[]
+  notes         TicketNote[]
+  auditLogs     TicketAuditLog[]
+
+  @@index([role])
+}
+
+model AuthorProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  externalAuthorId String   @unique // e.g. AUTH001
+  phone            String
+  city             String
+  joinedDate       DateTime
+
+  books            Book[]
+  tickets          Ticket[]
+
+  @@index([externalAuthorId])
+}
+
+model Book {
+  id                   String         @id @default(cuid())
+  externalBookId       String         @unique // e.g. BK001
+  authorId             String
+  author               AuthorProfile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title                String
+  isbn                 String
+  genre                String
+  publicationDate      DateTime?
+  status               String         // "Published & Live" | "In Production - Cover Design" | etc.
+  mrp                  Float?
+  authorRoyaltyPerCopy Float?
+  totalCopiesSold      Int            @default(0)
+  totalRoyaltyEarned   Float          @default(0)
+  royaltyPaid          Float          @default(0)
+  royaltyPending       Float          @default(0)
+  lastRoyaltyPayoutDate DateTime?
+  printPartner         String?        // "In-House" | "Repro India" | "Epitome Books"
+  availableOn          String         // Comma-separated or JSON list of platforms
+
+  tickets              Ticket[]
+
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  @@index([authorId])
+  @@index([externalBookId])
+  @@index([status])
+}
+
+model Ticket {
+  id                   String          @id @default(cuid())
+  ticketNumber         String          @unique // e.g. BL-1001
+  authorId             String
+  author               AuthorProfile   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  bookId               String?
+  book                 Book?           @relation(fields: [bookId], references: [id], onDelete: SetNull)
+  subject              String
+  description          String
+  attachmentUrl        String?
+  category             String          // "Royalty & Payments" | "ISBN & Metadata Issues" | "Printing & Quality" | "Distribution & Availability" | "Book Status & Production Updates" | "General Inquiry"
+  priority             String          // "Critical" | "High" | "Medium" | "Low"
+  classificationReason String?
+  suggestedNextStep    String?
+  status               String          @default("Open") // "Open" | "In Progress" | "Resolved" | "Closed"
+  assignedAdminId      String?
+  assignedAdmin        User?           @relation("AdminTickets", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  resolvedAt           DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  messages             TicketMessage[]
+  notes                TicketNote[]
+  auditLogs            TicketAuditLog[]
+
+  @@index([authorId])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([assignedAdminId])
+  @@index([createdAt])
+}
+
+model TicketMessage {
+  id         String   @id @default(cuid())
+  ticketId   String
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  senderId   String
+  sender     User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  body       String
+  visibility String   @default("PUBLIC") // "PUBLIC"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([ticketId])
+  @@index([senderId])
+}
+
+model TicketNote {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  adminId   String
+  admin     User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([adminId])
+}
+
+model TicketAuditLog {
+  id            String   @id @default(cuid())
+  ticketId      String
+  ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actorId       String
+  actor         User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  action        String   // "STATUS_CHANGE" | "PRIORITY_OVERRIDE" | "CATEGORY_OVERRIDE" | "ASSIGNMENT" | "NOTE_ADDED" | "RESPONSE_SENT"
+  previousValue String?
+  newValue      String?
+  createdAt     DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([createdAt])
+}

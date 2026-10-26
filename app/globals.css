@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FBF9F5;
+    --foreground: #1C2420;
+    --card: #FFFFFF;
+    --card-foreground: #1C2420;
+    --popover: #FFFFFF;
+    --popover-foreground: #1C2420;
+    --primary: #164334;
+    --primary-foreground: #FFFFFF;
+    --secondary: #EBF1ED;
+    --secondary-foreground: #164334;
+    --muted: #F2EFE9;
+    --muted-foreground: #5B6B63;
+    --accent: #E8F0EB;
+    --accent-foreground: #0F261C;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: #E6E1D8;
+    --input: #E6E1D8;
+    --ring: #275440;
+    --radius: 0.5rem;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom editorial styles */
+.editorial-title {
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+  letter-spacing: -0.02em;
+}
+
+/* Smooth glass effect with restrained opacity */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(230, 225, 216, 0.85);
+}
+
+/* Badge variants */
+.badge-status-open {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.badge-status-progress {
+  background-color: #E0E7FF;
+  color: #3730A3;
+  border: 1px solid #C7D2FE;
+}
+
+.badge-status-resolved {
+  background-color: #DEF7EC;
+  color: #03543F;
+  border: 1px solid #BCF0DA;
+}
+
+.badge-status-closed {
+  background-color: #F3F4F6;
+  color: #4B5563;
+  border: 1px solid #E5E7EB;
+}
+
+.badge-priority-critical {
+  background-color: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid #FCA5A5;
+}
+
+.badge-priority-high {
+  background-color: #FFEDD5;
+  color: #9A3412;
+  border: 1px solid #FDBA74;
+}
+
+.badge-priority-medium {
+  background-color: #FEF9C3;
+  color: #854D0E;
+  border: 1px solid #FDE047;
+}
+
+.badge-priority-low {
+  background-color: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
+}
